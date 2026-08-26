@@ -774,33 +774,6 @@ export function CollectionPage() {
           defaultValue="frame"
           className="flex h-full min-h-0 flex-col gap-0"
         >
-          <TabsList
-            variant="line"
-            className="h-auto w-full shrink-0 justify-start rounded-none border-b px-4 py-1"
-          >
-            <TabsTrigger
-              value="frame"
-              className="h-auto flex-none flex-col gap-1 px-3 py-1.5 text-xs"
-            >
-              <LayoutTemplate />
-              Frame
-            </TabsTrigger>
-            <TabsTrigger
-              value="background"
-              className="h-auto flex-none flex-col gap-1 px-3 py-1.5 text-xs"
-            >
-              <Palette />
-              Background
-            </TabsTrigger>
-            <TabsTrigger
-              value="margins"
-              className="h-auto flex-none flex-col gap-1 px-3 py-1.5 text-xs"
-            >
-              <SquareDashed />
-              Margins
-            </TabsTrigger>
-          </TabsList>
-
           <TabsContent
             value="frame"
             className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
@@ -885,6 +858,33 @@ export function CollectionPage() {
               }}
             />
           </TabsContent>
+
+          <TabsList
+            variant="line"
+            className="h-auto w-full shrink-0 justify-start rounded-none border-t px-4 py-1"
+          >
+            <TabsTrigger
+              value="frame"
+              className="h-auto flex-none flex-col gap-1 px-3 py-1.5 text-xs group-data-horizontal/tabs:after:top-[-5px] group-data-horizontal/tabs:after:bottom-auto"
+            >
+              <LayoutTemplate />
+              Frame
+            </TabsTrigger>
+            <TabsTrigger
+              value="background"
+              className="h-auto flex-none flex-col gap-1 px-3 py-1.5 text-xs group-data-horizontal/tabs:after:top-[-5px] group-data-horizontal/tabs:after:bottom-auto"
+            >
+              <Palette />
+              Background
+            </TabsTrigger>
+            <TabsTrigger
+              value="margins"
+              className="h-auto flex-none flex-col gap-1 px-3 py-1.5 text-xs group-data-horizontal/tabs:after:top-[-5px] group-data-horizontal/tabs:after:bottom-auto"
+            >
+              <SquareDashed />
+              Margins
+            </TabsTrigger>
+          </TabsList>
         </Tabs>
       </section>
     </div>
