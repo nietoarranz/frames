@@ -1,0 +1,3 @@
+export const STORY_WIDTH = 1080
+export const STORY_HEIGHT = 1920
+export const STORY_ASPECT = STORY_WIDTH / STORY_HEIGHT
