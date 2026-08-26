@@ -46,6 +46,9 @@ export function FittedFrame({ children, className }: FittedFrameProps) {
     }
 
     function measure() {
+      if (!el) {
+        return
+      }
       const next = frameSize(el.clientWidth, el.clientHeight)
       setSize((current) =>
         current.width === next.width &&
