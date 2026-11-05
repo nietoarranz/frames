@@ -251,7 +251,7 @@ export function PannablePhoto({
                   : label
       }
       className={cn(
-        "relative size-full overflow-hidden touch-none select-none [-webkit-touch-callout:none]",
+        "relative size-full touch-none overflow-hidden select-none [-webkit-touch-callout:none]",
         canPan && (isDragging ? "cursor-grabbing" : "cursor-grab"),
         !canPan && onClick && "cursor-pointer",
         className

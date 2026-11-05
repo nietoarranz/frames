@@ -1,9 +1,9 @@
-import type { CollectionFrameSpacing } from "@/components/collection-margins"
 import {
   collectionFrames,
   DEFAULT_COLLECTION_FRAME_ID,
   getCollectionFrame,
-  type CollectionFrameDesign,
+  spacingFromFrame,
+  type CollectionFrameSpacing,
 } from "@/lib/collection-frames"
 import {
   clampPan,
@@ -116,7 +116,7 @@ function requestToPromise<T>(request: IDBRequest<T>) {
   })
 }
 
-function openDb() {
+export function openDb() {
   if (!dbPromise) {
     dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION)
@@ -295,18 +295,9 @@ async function restoreBackground(
   }
 }
 
-function defaultSpacing(frame: CollectionFrameDesign): CollectionFrameSpacing {
-  return {
-    padding: { ...frame.padding },
-    gap: frame.gap,
-    linkHorizontal: true,
-    linkVertical: true,
-  }
-}
-
 function defaultSpacings() {
   return Object.fromEntries(
-    collectionFrames.map((frame) => [frame.id, defaultSpacing(frame)])
+    collectionFrames.map((frame) => [frame.id, spacingFromFrame(frame)])
   )
 }
 
@@ -391,10 +382,8 @@ export async function cloneCollectionStory(
     frameId: story.frameId,
     photos,
     pans: story.pans.map((pan) => ({ ...pan })),
-    fits: Array.from(
-      { length: photos.length },
-      (_, index) =>
-        isImageFit(story.fits?.[index]) ? story.fits[index] : DEFAULT_IMAGE_FIT
+    fits: Array.from({ length: photos.length }, (_, index) =>
+      isImageFit(story.fits?.[index]) ? story.fits[index] : DEFAULT_IMAGE_FIT
     ),
     transparentSlots: Array.from(
       { length: photos.length },
@@ -461,10 +450,8 @@ export function collectionDraftFromState(state: {
       id: story.id,
       frameId: story.frameId,
       pans: story.pans,
-      fits: Array.from(
-        { length: story.photos.length },
-        (_, index) =>
-          isImageFit(story.fits?.[index]) ? story.fits[index] : DEFAULT_IMAGE_FIT
+      fits: Array.from({ length: story.photos.length }, (_, index) =>
+        isImageFit(story.fits?.[index]) ? story.fits[index] : DEFAULT_IMAGE_FIT
       ),
       backgrounds: Object.fromEntries(
         Object.entries(story.backgrounds).map(([id, background]) => [

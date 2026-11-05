@@ -1,33 +1,15 @@
 import { Lock, RotateCcw, Unlock } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import type {
-  CollectionFrameDesign,
   CollectionFramePadding,
+  CollectionFrameSpacing,
 } from "@/lib/collection-frames"
 import { cn } from "@/lib/utils"
-
-export type CollectionFrameSpacing = {
-  padding: CollectionFramePadding
-  gap: number
-  linkHorizontal: boolean
-  linkVertical: boolean
-}
-
-export function spacingFromFrame(
-  frame: CollectionFrameDesign
-): CollectionFrameSpacing {
-  return {
-    padding: { ...frame.padding },
-    gap: frame.gap,
-    linkHorizontal: true,
-    linkVertical: true,
-  }
-}
 
 type CollectionMarginsProps = {
   width: number
@@ -67,11 +49,11 @@ function NumberField({
   max: number
   onChange: (value: number) => void
 }) {
-  const [draft, setDraft] = useState<string | null>(null)
-
-  useEffect(() => {
-    setDraft(null)
-  }, [value])
+  // A draft only applies to the value it was typed against, so outside
+  // changes (slider, undo) replace it without an effect.
+  const [draft, setDraft] = useState<{ text: string; base: number } | null>(
+    null
+  )
 
   function commit(raw: string) {
     const parsed = Number.parseInt(raw, 10)
@@ -92,12 +74,12 @@ function NumberField({
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={value}
-      value={draft ?? String(value)}
+      value={draft?.base === value ? draft.text : String(value)}
       onFocus={(event) => {
         event.currentTarget.select()
       }}
       onChange={(event) => {
-        setDraft(event.target.value)
+        setDraft({ text: event.target.value, base: value })
       }}
       onBlur={(event) => {
         commit(event.target.value)
@@ -138,7 +120,13 @@ function MarginRow({
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
       </Label>
-      <NumberField id={id} value={value} min={min} max={max} onChange={onChange} />
+      <NumberField
+        id={id}
+        value={value}
+        min={min}
+        max={max}
+        onChange={onChange}
+      />
       <Slider
         min={min}
         max={max}

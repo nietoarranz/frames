@@ -4,7 +4,7 @@ function isStandalone() {
     window.matchMedia("(display-mode: fullscreen)").matches ||
     Boolean(
       "standalone" in navigator &&
-        (navigator as Navigator & { standalone?: boolean }).standalone
+      (navigator as Navigator & { standalone?: boolean }).standalone
     )
   )
 }

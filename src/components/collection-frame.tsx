@@ -51,6 +51,7 @@ type CollectionFrameProps = {
   onFitChange?: (index: number, fit: ImageFit) => void
   onBackgroundPanChange?: (pan: ImagePan) => void
   onPhotoSelect?: (index: number, file: File) => void
+  onPhotoPick?: (index: number) => void
   onPhotoRemove?: (index: number) => void
   onToggleTransparent?: (index: number) => void
   passthroughHorizontalSwipe?: boolean
@@ -69,6 +70,7 @@ type FramePhotoSlotProps = {
   onPanChange?: (pan: ImagePan) => void
   onFitChange?: (fit: ImageFit) => void
   onSelect?: (file: File) => void
+  onPick?: () => void
   onRemove?: () => void
   onToggleTransparent?: () => void
   passthroughHorizontalSwipe?: boolean
@@ -91,6 +93,7 @@ function FramePhotoSlot({
   onPanChange,
   onFitChange,
   onSelect,
+  onPick,
   onRemove,
   onToggleTransparent,
   passthroughHorizontalSwipe,
@@ -196,15 +199,26 @@ function FramePhotoSlot({
             </Button>
           ) : null}
         </>
-      ) : onSelect ? (
+      ) : onSelect || onPick ? (
         <>
-          <label
-            htmlFor={inputId}
-            className="flex size-full cursor-pointer items-center justify-center text-muted-foreground"
-          >
-            <span className="sr-only">Add {label}</span>
-            {showBackground ? null : <ImagePlus className="size-6" />}
-          </label>
+          {onPick ? (
+            <button
+              type="button"
+              className="flex size-full cursor-pointer items-center justify-center text-muted-foreground"
+              onClick={onPick}
+            >
+              <span className="sr-only">Add {label}</span>
+              {showBackground ? null : <ImagePlus className="size-6" />}
+            </button>
+          ) : (
+            <label
+              htmlFor={inputId}
+              className="flex size-full cursor-pointer items-center justify-center text-muted-foreground"
+            >
+              <span className="sr-only">Add {label}</span>
+              {showBackground ? null : <ImagePlus className="size-6" />}
+            </label>
+          )}
           {onToggleTransparent ? (
             <Button
               type="button"
@@ -251,6 +265,7 @@ export function CollectionFrame({
   onFitChange,
   onBackgroundPanChange,
   onPhotoSelect,
+  onPhotoPick,
   onPhotoRemove,
   onToggleTransparent,
   passthroughHorizontalSwipe,
@@ -363,6 +378,13 @@ export function CollectionFrame({
                   onPhotoSelect
                     ? (file) => {
                         onPhotoSelect(index, file)
+                      }
+                    : undefined
+                }
+                onPick={
+                  onPhotoPick
+                    ? () => {
+                        onPhotoPick(index)
                       }
                     : undefined
                 }

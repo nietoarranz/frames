@@ -9,6 +9,14 @@ import { CollectionPage } from "@/pages/collection"
 
 installAppViewport()
 
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    void navigator.serviceWorker.register("/sw.js").catch(() => {
+      // Offline support is optional; the app works without it.
+    })
+  })
+}
+
 class BootErrorBoundary extends Component<
   { children: ReactNode },
   { error: Error | null }
