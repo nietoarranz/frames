@@ -26,7 +26,12 @@ The collection editor is the home page. Frames can be added in `src/lib/collecti
 | `npm run build` | Typecheck and production build |
 | `npm run preview` | Preview production build |
 | `npm run lint` | Run ESLint |
+| `npm test` | Run unit tests (Vitest) |
 | `npm run deploy` | Build and publish `dist` to the `gh-pages` branch |
+
+## Offline
+
+Production builds include a service worker (`sw.js`, generated from `sw/service-worker.js` by a plugin in `vite.config.ts`) that precaches the app, so it keeps working offline once loaded. Each build gets a new cache version. The worker is not registered in `npm run dev`.
 
 ## GitHub Pages (custom domain)
 
