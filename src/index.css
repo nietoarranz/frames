@@ -130,8 +130,10 @@
     overflow: hidden;
     height: var(--app-height, 100%);
     }
+  /* absolute, not fixed: iOS 26 adds a blur/gradient scroll-edge effect to
+     fixed elements pinned to the screen edges in home-screen web apps */
   #root {
-    position: fixed;
+    position: absolute;
     top: 0;
     right: 0;
     left: 0;
