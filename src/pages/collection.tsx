@@ -287,7 +287,7 @@ export function CollectionPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden overscroll-none bg-background">
-      <header className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 pb-3 md:px-8 standalone:pt-[max(0.5rem,env(safe-area-inset-top))]">
+      <header className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 pb-3 md:px-8 standalone:pt-[max(3rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-1">
           <Button
             type="button"
