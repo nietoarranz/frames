@@ -152,3 +152,7 @@
 @utility rounded-inherit {
   border-radius: inherit;
 }
+/* match the opaque black iOS status bar so there is no visible seam */
+html.dark.standalone {
+  --background: oklch(0 0 0);
+}

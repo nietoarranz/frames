@@ -287,7 +287,7 @@ export function CollectionPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden overscroll-none bg-background">
-      <header className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 pb-3 md:px-8 standalone:pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <header className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 pb-3 md:px-8 standalone:pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-1">
           <Button
             type="button"
@@ -474,7 +474,7 @@ export function CollectionPage() {
         />
       </section>
 
-      <section className="mt-3 flex h-[35%] min-h-0 shrink-0 flex-col border-t bg-card pb-[env(safe-area-inset-bottom,0px)]">
+      <section className="mt-3 flex h-[35%] min-h-0 shrink-0 flex-col border-t bg-card pb-[env(safe-area-inset-bottom,0px)] standalone:pb-[max(env(safe-area-inset-bottom),1.25rem)]">
         <Tabs
           defaultValue="photos"
           className="flex h-full min-h-0 flex-col gap-0"
