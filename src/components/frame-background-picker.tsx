@@ -15,6 +15,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  addRecentColor,
+  loadRecentColors,
+  PRESET_COLORS,
+  saveRecentColors,
+} from "@/lib/palette"
 import type {
   BackgroundMode,
   FrameBackground,
@@ -25,6 +31,8 @@ import { cn } from "@/lib/utils"
 type FrameBackgroundPickerProps = {
   value: string
   onChange: (hex: string) => void
+  /** Called when the picker closes after the color changed. */
+  onCommit?: (hex: string) => void
 }
 
 type FrameBackgroundImagePickerProps = {
@@ -39,6 +47,8 @@ type FrameBackgroundEditorProps = {
   onColorChange: (hex: string) => void
   onImageSelect: (file: File) => void
   onImageRemove: () => void
+  /** Colors suggested from the story's photos. */
+  photoColors?: string[]
 }
 
 function isImageFile(file: File | undefined): file is File {
@@ -123,14 +133,30 @@ function ColorPointer({ left, top }: { left: number; top: number }) {
   )
 }
 
+function sameColor(a: string, b: string) {
+  return a.toLowerCase() === b.toLowerCase()
+}
+
 export function FrameBackgroundPicker({
   value,
   onChange,
+  onCommit,
 }: FrameBackgroundPickerProps) {
   const [{ colorState }, setColor] = useColorState({
     type: "hex",
     value,
   })
+  const [syncedValue, setSyncedValue] = useState(value)
+  const openedWithRef = useRef(value)
+
+  // Follow outside changes (swatches, undo) without resetting the hue of
+  // colors the picker itself just produced.
+  if (!sameColor(value, syncedValue)) {
+    setSyncedValue(value)
+    if (!sameColor(value, colorState.hex)) {
+      setColor(new Color({ type: "hex", value }))
+    }
+  }
   const [hasEyeDropper] = useState(
     () => typeof window !== "undefined" && "EyeDropper" in window
   )
@@ -176,7 +202,15 @@ export function FrameBackgroundPicker({
   }
 
   return (
-    <Popover>
+    <Popover
+      onOpenChange={(open) => {
+        if (open) {
+          openedWithRef.current = value
+        } else if (!sameColor(openedWithRef.current, value)) {
+          onCommit?.(value)
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -187,9 +221,9 @@ export function FrameBackgroundPicker({
           <span
             aria-hidden
             className="size-5 rounded-md ring-1 ring-foreground/15"
-            style={{ backgroundColor: colorState.hex }}
+            style={{ backgroundColor: value }}
           />
-          <span className="font-mono text-xs uppercase">{colorState.hex}</span>
+          <span className="font-mono text-xs uppercase">{value}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -370,13 +404,70 @@ function FrameBackgroundImagePicker({
   )
 }
 
+function ColorSwatches({
+  label,
+  colors,
+  value,
+  onSelect,
+}: {
+  label: string
+  colors: string[]
+  value: string
+  onSelect: (hex: string) => void
+}) {
+  if (colors.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
+        {colors.map((color) => {
+          const selected = sameColor(color, value)
+
+          return (
+            <button
+              key={color}
+              type="button"
+              title={color}
+              aria-label={`${label}: ${color}`}
+              aria-pressed={selected}
+              className={cn(
+                "size-7 cursor-pointer rounded-full ring-1 ring-foreground/15 transition-shadow ring-inset",
+                selected &&
+                  "ring-2 ring-foreground ring-offset-2 ring-offset-card"
+              )}
+              style={{ backgroundColor: color }}
+              onClick={() => {
+                onSelect(color)
+              }}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export function FrameBackgroundEditor({
   background,
   onModeChange,
   onColorChange,
   onImageSelect,
   onImageRemove,
+  photoColors = [],
 }: FrameBackgroundEditorProps) {
+  const [recentColors, setRecentColors] = useState(loadRecentColors)
+
+  function rememberColor(hex: string) {
+    setRecentColors((current) => {
+      const next = addRecentColor(current, hex)
+      saveRecentColors(next)
+      return next
+    })
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <Tabs
@@ -403,10 +494,34 @@ export function FrameBackgroundEditor({
           onRemove={onImageRemove}
         />
       ) : (
-        <FrameBackgroundPicker
-          value={background.color}
-          onChange={onColorChange}
-        />
+        <>
+          <FrameBackgroundPicker
+            value={background.color}
+            onChange={onColorChange}
+            onCommit={rememberColor}
+          />
+          <ColorSwatches
+            label="From photos"
+            colors={photoColors}
+            value={background.color}
+            onSelect={(hex) => {
+              onColorChange(hex)
+              rememberColor(hex)
+            }}
+          />
+          <ColorSwatches
+            label="Presets"
+            colors={PRESET_COLORS}
+            value={background.color}
+            onSelect={onColorChange}
+          />
+          <ColorSwatches
+            label="Recent"
+            colors={recentColors}
+            value={background.color}
+            onSelect={onColorChange}
+          />
+        </>
       )}
     </div>
   )

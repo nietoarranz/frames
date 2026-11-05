@@ -41,10 +41,28 @@ export type FrameSlotRect = {
   height: number
 }
 
+export type CollectionFrameSpacing = {
+  padding: CollectionFramePadding
+  gap: number
+  linkHorizontal: boolean
+  linkVertical: boolean
+}
+
+/**
+ * Slot rectangles in design pixels. Slots span the content width and are
+ * centered vertically; like the CSS flex preview, an oversized stack overflows
+ * equally above and below.
+ */
 export function getFrameSlotRects(
-  design: CollectionFrameDesign
+  design: Pick<
+    CollectionFrameDesign,
+    "width" | "height" | "padding" | "gap" | "images"
+  >
 ): FrameSlotRect[] {
-  const contentWidth = design.width - design.padding.left - design.padding.right
+  const contentWidth = Math.max(
+    design.width - design.padding.left - design.padding.right,
+    1
+  )
   const contentHeight =
     design.height - design.padding.top - design.padding.bottom
   const heights = design.images.map(
@@ -53,7 +71,7 @@ export function getFrameSlotRects(
   const totalHeight =
     heights.reduce((sum, height) => sum + height, 0) +
     design.gap * Math.max(0, design.images.length - 1)
-  let y = design.padding.top + Math.max(0, contentHeight - totalHeight) / 2
+  let y = design.padding.top + (contentHeight - totalHeight) / 2
   const x = design.padding.left
 
   return design.images.map((image, index) => {
@@ -66,6 +84,17 @@ export function getFrameSlotRects(
 
 export function uniformPadding(value: number): CollectionFramePadding {
   return { top: value, right: value, bottom: value, left: value }
+}
+
+export function spacingFromFrame(
+  frame: CollectionFrameDesign
+): CollectionFrameSpacing {
+  return {
+    padding: { ...frame.padding },
+    gap: frame.gap,
+    linkHorizontal: true,
+    linkVertical: true,
+  }
 }
 
 export function frameUsesGap(design: Pick<CollectionFrameDesign, "images">) {

@@ -1,18 +1,16 @@
 import {
   Copy,
   Download,
-  Image as ImageIcon,
   Images,
   LayoutTemplate,
   Palette,
   Plus,
   Redo2,
-  RotateCcw,
   SquareDashed,
   Trash2,
   Undo2,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo } from "react"
 
 import { CollectionFrame } from "@/components/collection-frame"
 import { CollectionFramePreview } from "@/components/collection-frame-preview"
@@ -20,26 +18,13 @@ import { CollectionMargins } from "@/components/collection-margins"
 import { FittedFrame } from "@/components/fitted-frame"
 import { FrameBackgroundEditor } from "@/components/frame-background-picker"
 import { Notice } from "@/components/notice"
-import { PhotoLibraryTab } from "@/components/photo-library-tab"
-import { PhotoPickerDialog } from "@/components/photo-picker-dialog"
 import { StoryCarousel } from "@/components/story-carousel"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCollectionEditor } from "@/hooks/use-collection-editor"
 import { useNotice } from "@/hooks/use-notice"
-import { usePhotoLibrary } from "@/hooks/use-photo-library"
 import { useStoryExports } from "@/hooks/use-story-exports"
 import {
   cloneCollectionStory,
@@ -68,7 +53,6 @@ import {
 } from "@/lib/collection-frames"
 import { DEFAULT_IMAGE_PAN } from "@/lib/image-pan"
 import { extractPalette, mergePalettes } from "@/lib/palette"
-import { fileSignature, type LibraryPhoto } from "@/lib/photo-library"
 import { loadImage } from "@/lib/story"
 import { cn } from "@/lib/utils"
 
@@ -102,23 +86,6 @@ export function CollectionPage() {
   } = useCollectionEditor()
   const { notice, showNotice, dismissNotice } = useNotice()
   const { isExporting, exportStories } = useStoryExports(stories, activeIndex)
-  const library = usePhotoLibrary()
-  const usedPhotos = useMemo(() => {
-    const used = new Set<string>()
-    for (const story of stories) {
-      for (const photo of story.photos) {
-        if (photo) {
-          used.add(fileSignature(photo.file))
-        }
-      }
-    }
-    return used
-  }, [stories])
-  const [confirmResetOpen, setConfirmResetOpen] = useState(false)
-  const [pickerTarget, setPickerTarget] = useState<{
-    storyId: string
-    index: number
-  } | null>(null)
 
   const activeStory = stories[activeIndex] ?? stories[0]
   const { selectedFrame, spacing, background, design } =
@@ -194,30 +161,6 @@ export function CollectionPage() {
     }
   }
 
-  /** A photo picked or dropped on a slot joins the library too. */
-  async function handleSlotUpload(storyId: string, index: number, file: File) {
-    library.addPhotos([file])
-    await handlePhotoSelected(storyId, index, file)
-  }
-
-  function handleLibraryPick(photo: LibraryPhoto) {
-    if (pickerTarget) {
-      void handlePhotoSelected(
-        pickerTarget.storyId,
-        pickerTarget.index,
-        photo.file
-      )
-    }
-    setPickerTarget(null)
-  }
-
-  function handlePickerUpload(files: File[]) {
-    const [first] = library.addPhotos(files)
-    if (first) {
-      handleLibraryPick(first)
-    }
-  }
-
   async function handleBackgroundImageSelected(
     storyId: string,
     frameId: string,
@@ -266,14 +209,6 @@ export function CollectionPage() {
     showNotice("Story deleted", { label: "Undo", onAction: undo })
   }
 
-  function handleStartOver() {
-    commit(() => ({
-      stories: [createEmptyCollectionStory()],
-      activeIndex: 0,
-    }))
-    showNotice("Started over", { label: "Undo", onAction: undo })
-  }
-
   async function handleExport(targets: CollectionStoryState[]) {
     try {
       const skipped = await exportStories(targets)
@@ -310,16 +245,6 @@ export function CollectionPage() {
             onClick={redo}
           >
             <Redo2 />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Start over"
-            title="Start over"
-            onClick={() => setConfirmResetOpen(true)}
-          >
-            <RotateCcw />
           </Button>
         </div>
         <div className="flex items-center gap-2">
@@ -407,10 +332,7 @@ export function CollectionPage() {
                         : undefined
                     }
                     onPhotoSelect={(index, file) => {
-                      void handleSlotUpload(story.id, index, file)
-                    }}
-                    onPhotoPick={(index) => {
-                      setPickerTarget({ storyId: story.id, index })
+                      void handlePhotoSelected(story.id, index, file)
                     }}
                     onPhotoRemove={(index) => {
                       updateStory(story.id, (item) => withoutPhoto(item, index))
@@ -476,21 +398,9 @@ export function CollectionPage() {
 
       <section className="mt-3 flex h-[35%] min-h-0 shrink-0 flex-col border-t bg-card pb-[env(safe-area-inset-bottom,0px)]">
         <Tabs
-          defaultValue="photos"
+          defaultValue="frame"
           className="flex h-full min-h-0 flex-col gap-0"
         >
-          <TabsContent
-            value="photos"
-            className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
-          >
-            <PhotoLibraryTab
-              photos={library.photos}
-              usedPhotos={usedPhotos}
-              onAdd={library.addPhotos}
-              onRemove={library.removePhotos}
-            />
-          </TabsContent>
-
           <TabsContent
             value="frame"
             className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
@@ -589,10 +499,6 @@ export function CollectionPage() {
             variant="line"
             className="h-auto w-full shrink-0 justify-start rounded-none border-t px-4 py-1"
           >
-            <TabsTrigger value="photos" className={TAB_TRIGGER_CLASS}>
-              <ImageIcon />
-              Photos
-            </TabsTrigger>
             <TabsTrigger value="frame" className={TAB_TRIGGER_CLASS}>
               <LayoutTemplate />
               Frame
@@ -608,37 +514,6 @@ export function CollectionPage() {
           </TabsList>
         </Tabs>
       </section>
-
-      <PhotoPickerDialog
-        open={pickerTarget !== null}
-        photos={library.photos}
-        usedPhotos={usedPhotos}
-        onOpenChange={(open) => {
-          if (!open) {
-            setPickerTarget(null)
-          }
-        }}
-        onPick={handleLibraryPick}
-        onUpload={handlePickerUpload}
-      />
-
-      <AlertDialog open={confirmResetOpen} onOpenChange={setConfirmResetOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Start over?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This deletes all {pluralStories(stories.length)} so you can start
-              from scratch. You can still undo it afterwards.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleStartOver}>
-              Delete all stories
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

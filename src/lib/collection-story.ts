@@ -1,4 +1,7 @@
-import type { CollectionFrameDesign } from "@/lib/collection-frames"
+import {
+  getFrameSlotRects,
+  type CollectionFrameDesign,
+} from "@/lib/collection-frames"
 import {
   DEFAULT_IMAGE_PAN,
   clampPan,
@@ -23,36 +26,6 @@ export type CollectionBackgroundImage = {
   imageWidth: number
   imageHeight: number
   pan?: ImagePan
-}
-
-export function getCollectionSlotRects(
-  design: CollectionFrameDesign
-): ImageRect[] {
-  const contentWidth = Math.max(
-    design.width - design.padding.left - design.padding.right,
-    1
-  )
-  const heights = design.images.map(
-    (image) => (contentWidth * image.aspectHeight) / image.aspectWidth
-  )
-  const stackedHeight =
-    heights.reduce((total, height) => total + height, 0) +
-    design.gap * Math.max(design.images.length - 1, 0)
-  const extra =
-    design.height - design.padding.top - design.padding.bottom - stackedHeight
-
-  let y = design.padding.top + extra / 2
-
-  return heights.map((height) => {
-    const rect = {
-      x: design.padding.left,
-      y,
-      width: contentWidth,
-      height,
-    }
-    y += height + design.gap
-    return rect
-  })
 }
 
 function drawImageCover(
@@ -189,7 +162,7 @@ export function drawCollectionStory(
     )
   }
 
-  const rects = getCollectionSlotRects(design)
+  const rects = getFrameSlotRects(design)
 
   photos.forEach((photo, index) => {
     const rect = rects[index]

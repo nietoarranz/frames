@@ -12,31 +12,51 @@ export async function loadImage(src: string): Promise<HTMLImageElement> {
   return image
 }
 
-export function fallbackDownload(imageUrl: string, filename: string) {
-  const link = document.createElement("a")
-  link.href = imageUrl
-  link.download = filename
-  link.click()
+function canShareFiles(files: File[]) {
+  return (
+    typeof navigator.share === "function" &&
+    typeof navigator.canShare === "function" &&
+    navigator.canShare({ files })
+  )
 }
 
-export async function shareFile(file: File, fallbackUrl: string) {
-  if (typeof navigator.share !== "function") {
-    fallbackDownload(fallbackUrl, file.name)
+/** Saves files through ordinary downloads, one after another. */
+export async function downloadFiles(files: File[]) {
+  for (const [index, file] of files.entries()) {
+    if (index > 0) {
+      // Browsers drop rapid consecutive downloads.
+      await new Promise((resolve) => window.setTimeout(resolve, 250))
+    }
+
+    const url = URL.createObjectURL(file)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = file.name
+    link.click()
+    window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  }
+}
+
+/**
+ * Opens the share sheet when the browser can share these files, and falls
+ * back to downloads when it can't or sharing fails. Cancelling the share
+ * sheet is not a failure.
+ */
+export async function shareFiles(files: File[]) {
+  if (files.length === 0) {
     return
   }
 
-  try {
-    await navigator.share({ files: [file] })
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
+  if (canShareFiles(files)) {
+    try {
+      await navigator.share({ files })
       return
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return
+      }
     }
   }
-}
 
-export async function shareImage(imageUrl: string, filename = "image.png") {
-  const response = await fetch(imageUrl)
-  const blob = await response.blob()
-  const file = new File([blob], filename, { type: blob.type })
-  await shareFile(file, imageUrl)
+  await downloadFiles(files)
 }
