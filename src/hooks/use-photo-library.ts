@@ -114,5 +114,10 @@ export function usePhotoLibrary() {
     setPhotos((current) => current.filter((photo) => !doomed.has(photo.id)))
   }, [])
 
-  return { photos, addPhotos, removePhotos }
+  const clearPhotos = useCallback(() => {
+    revokeLibraryPhotos(photosRef.current)
+    setPhotos([])
+  }, [])
+
+  return { photos, addPhotos, removePhotos, clearPhotos }
 }

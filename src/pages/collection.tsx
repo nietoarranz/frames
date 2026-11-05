@@ -267,6 +267,7 @@ export function CollectionPage() {
   }
 
   function handleStartOver() {
+    library.clearPhotos()
     commit(() => ({
       stories: [createEmptyCollectionStory()],
       activeIndex: 0,
@@ -627,8 +628,9 @@ export function CollectionPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Start over?</AlertDialogTitle>
             <AlertDialogDescription>
-              This deletes all {pluralStories(stories.length)} so you can start
-              from scratch. You can still undo it afterwards.
+              This deletes all {pluralStories(stories.length)} and every photo in
+              the Photos tab so you can start from scratch. Undo only restores
+              the stories.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
