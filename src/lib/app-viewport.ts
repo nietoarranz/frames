@@ -9,12 +9,23 @@ function isStandalone() {
   )
 }
 
+function screenHeight() {
+  const portrait = window.matchMedia("(orientation: portrait)").matches
+  return portrait ? window.screen.height : window.screen.width
+}
+
 function measureHeight() {
   const viewportHeight = Math.max(
     window.innerHeight,
     window.visualViewport?.height ?? 0,
     document.documentElement.clientHeight
   )
+
+  if (isStandalone()) {
+    // iOS home-screen mode reports a short innerHeight/vh, but the
+    // webview still paints the rest of the screen (the black gap).
+    return Math.max(viewportHeight, screenHeight())
+  }
 
   return viewportHeight
 }
