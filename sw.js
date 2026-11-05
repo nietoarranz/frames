@@ -2,8 +2,8 @@
 // Offline support. The build fills in the precache list and version (see
 // vite.config.ts), so every deploy installs a fresh worker and cache.
 
-const VERSION = "78c6a45507c3"
-const PRECACHE = ["/","/site.webmanifest","/favicon.ico","/favicon.svg","/favicon-32x32.png","/apple-touch-icon.png","/icon-192.png","/icon-512.png","/assets/index-CtvvQbjW.js","/assets/geist-cyrillic-ext-wght-normal-DjL33-gN.woff2","/assets/geist-cyrillic-wght-normal-BEAKL7Jp.woff2","/assets/geist-latin-ext-wght-normal-DC-KSUi6.woff2","/assets/geist-latin-wght-normal-BgDaEnEv.woff2","/assets/geist-vietnamese-wght-normal-6IgcOCM7.woff2","/assets/index-CTZmzsB-.css"]
+const VERSION = "26c972efca96"
+const PRECACHE = ["/","/site.webmanifest","/favicon.ico","/favicon.svg","/favicon-32x32.png","/apple-touch-icon.png","/icon-192.png","/icon-512.png","/assets/index-DoQRfBj4.js","/assets/geist-cyrillic-ext-wght-normal-DjL33-gN.woff2","/assets/geist-cyrillic-wght-normal-BEAKL7Jp.woff2","/assets/geist-latin-ext-wght-normal-DC-KSUi6.woff2","/assets/geist-latin-wght-normal-BgDaEnEv.woff2","/assets/geist-vietnamese-wght-normal-6IgcOCM7.woff2","/assets/index-CTZmzsB-.css"]
 const CACHE = `frames-${VERSION}`
 
 self.addEventListener("install", (event) => {
