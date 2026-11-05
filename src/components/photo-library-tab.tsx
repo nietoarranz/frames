@@ -204,7 +204,7 @@ export function PhotoLibraryTab({
                 decoding="async"
                 draggable={false}
                 className={cn(
-                  "size-full object-cover",
+                  "size-full object-contain",
                   selecting && isSelected && "opacity-60"
                 )}
               />

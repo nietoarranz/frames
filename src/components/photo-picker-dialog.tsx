@@ -102,7 +102,7 @@ export function PhotoPickerDialog({
                     loading="lazy"
                     decoding="async"
                     draggable={false}
-                    className="size-full object-cover"
+                    className="size-full object-contain"
                   />
                   {usedPhotos.has(fileSignature(photo.file)) ? (
                     <UsedBadge />
